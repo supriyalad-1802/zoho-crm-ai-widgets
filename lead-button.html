@@ -1,316 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f8f9ff;
-    padding: 20px;
-    min-height: 100vh;
-  }
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e8ecff;
-  }
-  .ai-badge {
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .lead-info {
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #e8ecff;
-  }
-  .lead-info h4 {
-    color: #4a5568;
-    font-size: 13px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .info-item {
-    font-size: 12px;
-    color: #2d3748;
-  }
-  .info-item span {
-    color: #718096;
-  }
-  .quick-prompts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 15px;
-  }
-  .qp-btn {
-    padding: 7px 14px;
-    border: 1.5px solid #667eea;
-    border-radius: 20px;
-    background: white;
-    color: #667eea;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .qp-btn:hover {
-    background: #667eea;
-    color: white;
-  }
-  .chat-container {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #e8ecff;
-    overflow: hidden;
-  }
-  .chat-messages {
-    height: 280px;
-    overflow-y: auto;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .msg {
-    max-width: 85%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-  .msg.user {
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    color: white;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-  }
-  .msg.ai {
-    background: #f0f4ff;
-    color: #2d3748;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-    white-space: pre-wrap;
-  }
-  .msg.loading {
-    background: #f0f4ff;
-    color: #667eea;
-    align-self: flex-start;
-  }
-  .input-row {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    border-top: 1px solid #e8ecff;
-    background: #fafbff;
-  }
-  .msg-input {
-    flex: 1;
-    padding: 9px 14px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 20px;
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-    transition: border 0.2s;
-  }
-  .msg-input:focus {
-    border-color: #667eea;
-  }
-  .send-btn {
-    padding: 9px 18px;
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .send-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .welcome {
-    text-align: center;
-    color: #a0aec0;
-    font-size: 13px;
-    margin-top: 80px;
-  }
-</style>
+    <meta charset="UTF-8">
+    <script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9ff; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #e8ecff; padding-bottom: 10px;}
+        .ai-badge { background: linear-gradient(135deg,#667eea,#764ba2); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .lead-info { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #e8ecff; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+        .chat-container { background: white; border-radius: 10px; border: 1px solid #e8ecff; overflow: hidden; }
+        .chat-messages { height: 300px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 85%; padding: 10px; border-radius: 12px; font-size: 13px; }
+        .msg.user { background: #667eea; color: white; align-self: flex-end; }
+        .msg.ai { background: #f0f4ff; color: #2d3748; align-self: flex-start; white-space: pre-wrap; }
+        .input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #e8ecff; }
+        .msg-input { flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 20px; }
+        .send-btn { padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; }
+    </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="ai-badge">🤖 AI Assistant</div>
-  <div id="leadTitle" style="font-size:15px;font-weight:600;color:#2d3748">
-    Loading...
-  </div>
-</div>
-
-<div class="lead-info">
-  <h4>📋 Lead Context</h4>
-  <div class="info-grid" id="infoGrid">
-    <div class="info-item">Loading lead data...</div>
-  </div>
-</div>
-
-<div class="quick-prompts">
-  <button class="qp-btn" onclick="quickAsk('Analyze this lead and suggest the best next action')">
-    📊 Analyze
-  </button>
-  <button class="qp-btn" onclick="quickAsk('Draft a personalized follow-up email for this lead')">
-    ✉️ Draft Email
-  </button>
-  <button class="qp-btn" onclick="quickAsk('What are the key risks and opportunities with this lead?')">
-    ⚠️ Risk & Opportunity
-  </button>
-  <button class="qp-btn" onclick="quickAsk('Give me 3 specific talking points for my next call')">
-    💬 Talking Points
-  </button>
-  <button class="qp-btn" onclick="quickAsk('Is this lead likely to convert? Give probability and reasoning')">
-    🎯 Convert Probability
-  </button>
-</div>
-
-<div class="chat-container">
-  <div class="chat-messages" id="chatMessages">
-    <div class="welcome">
-      💡 Select a quick prompt or type your question below
+    <div class="header">
+        <div class="ai-badge">🤖 AI Assistant</div>
+        <div id="leadTitle" style="font-weight:600;">Connecting to Zoho...</div>
     </div>
-  </div>
-  <div class="input-row">
-    <input type="text" class="msg-input" id="msgInput" 
-      placeholder="Ask anything about this lead..."
-      onkeydown="if(event.key==='Enter') sendMsg()">
-    <button class="send-btn" id="sendBtn" onclick="sendMsg()">
-      Send ➤
-    </button>
-  </div>
-</div>
+    <div class="lead-info">
+        <div class="info-grid" id="infoGrid">Waiting for lead data...</div>
+    </div>
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="input-row">
+            <input type="text" class="msg-input" id="msgInput" placeholder="Ask about this lead...">
+            <button class="send-btn" id="sendBtn" onclick="sendMsg()">Send</button>
+        </div>
+    </div>
 
 <script>
-  var leadContext = {};
-  var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev"; 
-  
-  // 2. WRAP EVERYTHING IN PAGELOAD
-  ZOHO.embeddedApp.on("PageLoad", function(data) {
-    ZOHO.CRM.API.getRecord({
-      Entity: data.Entity,
-      RecordID: data.EntityId
-    }).then(function(response) {
-      if(response.data && response.data.length > 0) {
-        leadContext = response.data[0];
-        updateLeadInfo(leadContext);
-      }
+    var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev";
+    var leadData = {};
+
+    // THIS IS THE CRITICAL INITIALIZATION BLOCK
+    ZOHO.embeddedApp.on("PageLoad", function(data) {
+        ZOHO.CRM.API.getRecord({
+            Entity: data.Entity,
+            RecordID: data.EntityId
+        }).then(function(response) {
+            leadData = response.data[0];
+            document.getElementById('leadTitle').innerText = leadData.Full_Name || "Lead Analysis";
+            document.getElementById('infoGrid').innerHTML = "Ready to analyze " + (leadData.Full_Name || "this lead");
+        });
     });
-  });
+    ZOHO.embeddedApp.init();
 
-  ZOHO.embeddedApp.init();
+    function addMessage(text, type) {
+        var div = document.createElement('div');
+        div.className = 'msg ' + type;
+        div.innerText = text;
+        document.getElementById('chatMessages').appendChild(div);
+        return div;
+    }
 
-  function updateLeadInfo(rec) {
-    document.getElementById('leadTitle').innerText = 
-      (rec.Full_Name || rec.Deal_Name || 'Record') + 
-      ' — ' + (rec.Company || '');
+    async function sendMsg() {
+        var input = document.getElementById('msgInput');
+        var question = input.value;
+        if(!question) return;
+        
+        addMessage(question, 'user');
+        var loading = addMessage("Thinking...", 'ai');
+        input.value = "";
 
-    var grid = document.getElementById('infoGrid');
-    var fields = [
-      ['Source', rec.Lead_Source],
-      ['Budget', rec.Budget ? '₹'+rec.Budget : 'N/A'],
-      ['Score', rec.Lead_Score || 'N/A'],
-      ['Priority', rec.Priority || 'N/A'],
-      ['Timeline', rec.Timeline || 'N/A'],
-      ['Status', rec.Lead_Status || rec.Stage || 'N/A']
-    ];
-
-    grid.innerHTML = fields.map(function(f) {
-      return '<div class="info-item"><span>' + 
-        f[0] + ':</span> ' + (f[1] || 'N/A') + '</div>';
-    }).join('');
-  }
-
-  function buildContext() {
-    return "Lead Name: " + (leadContext.Full_Name || 'N/A') +
-      "\nCompany: " + (leadContext.Company || 'N/A') +
-      "\nBudget: " + (leadContext.Budget || 'N/A') +
-      "\nStatus: " + (leadContext.Lead_Status || 'N/A');
-  }
-
-  function quickAsk(prompt) {
-    document.getElementById('msgInput').value = prompt;
-    sendMsg();
-  }
-
-  function addMessage(text, type) {
-    var container = document.getElementById('chatMessages');
-    var welcome = container.querySelector('.welcome');
-    if(welcome) welcome.remove();
-
-    var div = document.createElement('div');
-    div.className = 'msg ' + type;
-    div.id = type === 'loading' ? 'loadingMsg' : '';
-    div.innerText = text;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    return div;
-  }
-
-  function sendMsg() {
-    var input = document.getElementById('msgInput');
-    var question = input.value.trim();
-    if(!question) return;
-
-    var btn = document.getElementById('sendBtn');
-    btn.disabled = true;
-    input.value = '';
-
-    addMessage(question, 'user');
-    addMessage('🤖 Thinking...', 'loading');
-
-    var prompt = "LEAD CONTEXT:\n" + buildContext() + "\n\nQUESTION: " + question;
-
-   fetch(NGROK_URL + "/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain", // Changed from application/json to bypass preflight
-      },
-      body: JSON.stringify({
-        model: "llama3.2",
-        prompt: prompt,
-        stream: false
-      })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      var loadingMsg = document.getElementById('loadingMsg');
-      if(loadingMsg) loadingMsg.remove();
-      addMessage(data.response || "No response", 'ai');
-    })
-    .catch(function(err) {
-      var loadingMsg = document.getElementById('loadingMsg');
-      if(loadingMsg) loadingMsg.remove();
-      addMessage("Error: " + err.message, 'ai');
-    })
-    .finally(function() {
-      btn.disabled = false;
-    });
-  }
+        try {
+            const response = await fetch(NGROK_URL + "/api/generate", {
+                method: "POST",
+                // Removing custom headers to bypass CORS preflight
+                body: JSON.stringify({
+                    model: "llama3.2",
+                    prompt: "Lead: " + JSON.stringify(leadData) + "\nQuestion: " + question,
+                    stream: false
+                })
+            });
+            const data = await response.json();
+            loading.innerText = data.response;
+        } catch (err) {
+            loading.innerText = "Error: " + err.message;
+        }
+    }
 </script>
 </body>
 </html>
