@@ -285,11 +285,10 @@
 
     var prompt = "LEAD CONTEXT:\n" + buildContext() + "\n\nQUESTION: " + question;
 
-    fetch(NGROK_URL + "/api/generate", {
+   fetch(NGROK_URL + "/api/generate", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true"
+        "Content-Type": "text/plain", // Changed from application/json to bypass preflight
       },
       body: JSON.stringify({
         model: "llama3.2",
