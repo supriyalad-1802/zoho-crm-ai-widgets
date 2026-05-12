@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -195,7 +196,7 @@
     </div>
   </div>
   <div class="input-row">
-    <input type="text" class="msg-input" id="msgInput"
+    <input type="text" class="msg-input" id="msgInput" 
       placeholder="Ask anything about this lead..."
       onkeydown="if(event.key==='Enter') sendMsg()">
     <button class="send-btn" id="sendBtn" onclick="sendMsg()">
@@ -204,26 +205,19 @@
   </div>
 </div>
 
-<script src="https://js.zohostatic.com/zohocrm/javascript/v2.0/js/zcrmsdk.js">
-</script>
 <script>
   var leadContext = {};
-  var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev"; // UPDATE THIS
-  var chatHistory = [];
-
-  // Initialize and load record data
+  var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev"; 
+  
+  // 2. WRAP EVERYTHING IN PAGELOAD
   ZOHO.embeddedApp.on("PageLoad", function(data) {
-    var entity = data.Entity;
-    var recordId = data.EntityId;
-
     ZOHO.CRM.API.getRecord({
-      Entity: entity,
-      RecordID: recordId
+      Entity: data.Entity,
+      RecordID: data.EntityId
     }).then(function(response) {
       if(response.data && response.data.length > 0) {
-        var rec = response.data[0];
-        leadContext = rec;
-        updateLeadInfo(rec);
+        leadContext = response.data[0];
+        updateLeadInfo(leadContext);
       }
     });
   });
@@ -231,12 +225,10 @@
   ZOHO.embeddedApp.init();
 
   function updateLeadInfo(rec) {
-    // Update title
-    document.getElementById('leadTitle').innerText =
-      (rec.Full_Name || rec.Deal_Name || 'Record') +
+    document.getElementById('leadTitle').innerText = 
+      (rec.Full_Name || rec.Deal_Name || 'Record') + 
       ' — ' + (rec.Company || '');
 
-    // Update info grid
     var grid = document.getElementById('infoGrid');
     var fields = [
       ['Source', rec.Lead_Source],
@@ -248,23 +240,16 @@
     ];
 
     grid.innerHTML = fields.map(function(f) {
-      return '<div class="info-item"><span>' +
+      return '<div class="info-item"><span>' + 
         f[0] + ':</span> ' + (f[1] || 'N/A') + '</div>';
     }).join('');
   }
 
   function buildContext() {
-    if(!leadContext) return "No record context available";
     return "Lead Name: " + (leadContext.Full_Name || 'N/A') +
       "\nCompany: " + (leadContext.Company || 'N/A') +
-      "\nLead Source: " + (leadContext.Lead_Source || 'N/A') +
       "\nBudget: " + (leadContext.Budget || 'N/A') +
-      "\nTimeline: " + (leadContext.Timeline || 'N/A') +
-      "\nRequirement: " + (leadContext.Requirement_Type || 'N/A') +
-      "\nLead Score: " + (leadContext.Lead_Score || 'N/A') +
-      "\nPriority: " + (leadContext.Priority || 'N/A') +
-      "\nStatus: " + (leadContext.Lead_Status || 'N/A') +
-      "\nDuplicate Flag: " + (leadContext.Duplicate_Flag || 'No');
+      "\nStatus: " + (leadContext.Lead_Status || 'N/A');
   }
 
   function quickAsk(prompt) {
@@ -274,7 +259,6 @@
 
   function addMessage(text, type) {
     var container = document.getElementById('chatMessages');
-    // Remove welcome message
     var welcome = container.querySelector('.welcome');
     if(welcome) welcome.remove();
 
@@ -296,21 +280,11 @@
     btn.disabled = true;
     input.value = '';
 
-    // Add user message
     addMessage(question, 'user');
-
-    // Add loading
     addMessage('🤖 Thinking...', 'loading');
 
-    // Build prompt with context
-    var prompt = "You are an expert CRM sales assistant. " +
-      "Analyze the following lead and answer the question.\n\n" +
-      "LEAD CONTEXT:\n" + buildContext() +
-      "\n\nQUESTION: " + question +
-      "\n\nProvide a clear, actionable response in 3-5 lines. " +
-      "Be specific to this lead's data.";
+    var prompt = "LEAD CONTEXT:\n" + buildContext() + "\n\nQUESTION: " + question;
 
-    // Call Ollama
     fetch(NGROK_URL + "/api/generate", {
       method: "POST",
       headers: {
@@ -320,11 +294,7 @@
       body: JSON.stringify({
         model: "llama3.2",
         prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.3,
-          num_predict: 250
-        }
+        stream: false
       })
     })
     .then(function(res) { return res.json(); })
@@ -336,14 +306,7 @@
     .catch(function(err) {
       var loadingMsg = document.getElementById('loadingMsg');
       if(loadingMsg) loadingMsg.remove();
-      addMessage(
-        "❌ AI unavailable. Check:\n" +
-        "1. Ollama running (ollama serve)\n" +
-        "2. Ngrok running\n" +
-        "3. URL updated in widget\n" +
-        "Error: " + err.message,
-        'ai'
-      );
+      addMessage("Error: " + err.message, 'ai');
     })
     .finally(function() {
       btn.disabled = false;
