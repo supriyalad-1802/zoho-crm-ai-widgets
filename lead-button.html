@@ -40,52 +40,26 @@
     var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev";
     var leadData = {};
 
-    // THIS IS THE CRITICAL INITIALIZATION BLOCK
+    // 1. Define the logic FIRST
     ZOHO.embeddedApp.on("PageLoad", function(data) {
+        console.log("Page Loaded", data);
         ZOHO.CRM.API.getRecord({
             Entity: data.Entity,
             RecordID: data.EntityId
         }).then(function(response) {
-            leadData = response.data[0];
-            document.getElementById('leadTitle').innerText = leadData.Full_Name || "Lead Analysis";
-            document.getElementById('infoGrid').innerHTML = "Ready to analyze " + (leadData.Full_Name || "this lead");
+            if(response.data && response.data.length > 0) {
+                leadData = response.data[0];
+                // This updates the UI so you know it worked
+                document.getElementById('leadTitle').innerText = leadData.Full_Name || "Lead Analysis";
+                document.getElementById('infoGrid').innerHTML = "Context loaded for " + (leadData.Full_Name || "this lead");
+            }
         });
     });
+
+    // 2. Initialize LAST
     ZOHO.embeddedApp.init();
 
-    function addMessage(text, type) {
-        var div = document.createElement('div');
-        div.className = 'msg ' + type;
-        div.innerText = text;
-        document.getElementById('chatMessages').appendChild(div);
-        return div;
-    }
-
-    async function sendMsg() {
-        var input = document.getElementById('msgInput');
-        var question = input.value;
-        if(!question) return;
-        
-        addMessage(question, 'user');
-        var loading = addMessage("Thinking...", 'ai');
-        input.value = "";
-
-        try {
-            const response = await fetch(NGROK_URL + "/api/generate", {
-                method: "POST",
-                // Removing custom headers to bypass CORS preflight
-                body: JSON.stringify({
-                    model: "llama3.2",
-                    prompt: "Lead: " + JSON.stringify(leadData) + "\nQuestion: " + question,
-                    stream: false
-                })
-            });
-            const data = await response.json();
-            loading.innerText = data.response;
-        } catch (err) {
-            loading.innerText = "Error: " + err.message;
-        }
-    }
+    // ... (Keep the rest of your addMessage and sendMsg functions the same)
 </script>
 </body>
 </html>
