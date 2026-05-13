@@ -60,16 +60,10 @@
 </div>
 
 <script>
-// ============================================
-// CONFIG — UPDATE NGROK URL HERE
-// ============================================
 var NGROK = "https://grey-nonesurient-jaquelyn.ngrok-free.dev";
 var MODEL = "llama3.2";
 var lead = {};
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 function addMsg(text, type) {
     var c = document.getElementById('msgs');
     var d = document.createElement('div');
@@ -86,14 +80,15 @@ function removeLoading() {
 }
 
 function getContext() {
-    if(!lead.Full_Name) return "No lead context loaded.";
+    if(!lead || !lead.Full_Name) {
+        return "No lead context. Answer generally.";
+    }
     return "Name: " + (lead.Full_Name||'N/A') +
         "\nCompany: " + (lead.Company||'N/A') +
         "\nSource: " + (lead.Lead_Source||'N/A') +
         "\nBudget: " + (lead.Budget||'N/A') +
         "\nTimeline: " + (lead.Timeline||'N/A') +
         "\nRequirement: " + (lead.Requirement_Type||'N/A') +
-        
         "\nScore: " + (lead.Lead_Score||'N/A') +
         "\nPriority: " + (lead.Priority||'N/A') +
         "\nStatus: " + (lead.Lead_Status||'N/A');
@@ -106,14 +101,13 @@ function askAI(question) {
     addMsg(question, 'user');
     addMsg('🤖 Thinking...', 'loading');
     var prompt = "You are a CRM sales assistant. " +
-        "Here is the lead data:\n" + getContext() +
+        "Lead data:\n" + getContext() +
         "\n\nQuestion: " + question +
-        "\n\nGive a concise, actionable answer in 3-4 lines.";
-fetch(NGROK + "/api/generate?ngrok-skip-browser-warning=true", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },     body: JSON.stringify({
+        "\n\nAnswer concisely in 3-4 lines.";
+    fetch(NGROK + "/api/generate?ngrok-skip-browser-warning=true", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
             model: MODEL,
             prompt: prompt,
             stream: false,
@@ -127,80 +121,56 @@ fetch(NGROK + "/api/generate?ngrok-skip-browser-warning=true", {
     })
     .catch(function(e){
         removeLoading();
-        addMsg("❌ Error: " + e.message, 'ai');
+        addMsg("❌ " + e.message, 'ai');
     })
     .finally(function(){
         document.getElementById('sbtn').disabled = false;
     });
 }
 
-// ============================================
-// BUTTON EVENTS — Attached after DOM ready
-// ============================================
-window.onload = function() {
-    // Send button
-    document.getElementById('sbtn').onclick = function() {
-        askAI(document.getElementById('inp').value);
-    };
+// Button events
+document.getElementById('sbtn').addEventListener('click', function(){
+    askAI(document.getElementById('inp').value);
+});
+document.getElementById('inp').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') askAI(this.value);
+});
+document.getElementById('btn1').addEventListener('click', function(){
+    askAI('Analyze this lead and suggest best next action');
+});
+document.getElementById('btn2').addEventListener('click', function(){
+    askAI('Draft a short follow-up email for this lead');
+});
+document.getElementById('btn3').addEventListener('click', function(){
+    askAI('What are the key risks with this lead?');
+});
+document.getElementById('btn4').addEventListener('click', function(){
+    askAI('Give 3 talking points for my next call');
+});
+document.getElementById('btn5').addEventListener('click', function(){
+    askAI('Will this lead convert? Give probability');
+});
 
-    // Enter key
-    document.getElementById('inp').onkeydown = function(e) {
-        if(e.key === 'Enter') askAI(this.value);
-    };
-
-    // Quick buttons
-    document.getElementById('btn1').onclick = function() {
-        askAI('Analyze this lead and suggest the best next action');
-    };
-    document.getElementById('btn2').onclick = function() {
-        askAI('Draft a short personalized follow-up email for this lead');
-    };
-    document.getElementById('btn3').onclick = function() {
-        askAI('What are the key risks with this lead?');
-    };
-    document.getElementById('btn4').onclick = function() {
-        askAI('Give 3 specific talking points for my next call with this lead');
-    };
-    document.getElementById('btn5').onclick = function() {
-        askAI('Will this lead likely convert? Give probability and reason');
-    };
-
-    // ============================================
-    // ZOHO SDK — Load AFTER all functions defined
-    // ============================================
-    if(typeof ZOHO !== 'undefined') {
-        initZoho();
-    } else {
-        // Wait for SDK to load
-        var checkSDK = setInterval(function() {
-            if(typeof ZOHO !== 'undefined') {
-                clearInterval(checkSDK);
-                initZoho();
-            }
-        }, 100);
-        // Timeout after 5 seconds
-        setTimeout(function() {
-            clearInterval(checkSDK);
-            document.getElementById('leadTitle').innerText = 'SDK Timeout';
-            addMsg('⚠️ Zoho SDK timeout. AI still works without lead context.', 'ai');
-        }, 5000);
-    }
-};
-
-function initZoho() {
+// ZOHO SDK
+function loadLeadData() {
     ZOHO.embeddedApp.on("PageLoad", function(data) {
-        document.getElementById('leadTitle').innerText = 'Loading lead...';
+        console.log("PageLoad:", data);
+        var entityId = data.EntityId || data.recordId;
+        var entity = data.Entity || data.module;
+        if(!entityId) {
+            document.getElementById('leadTitle').innerText = 'No Record ID';
+            return;
+        }
         ZOHO.CRM.API.getRecord({
-            Entity: data.Entity,
-            RecordID: data.EntityId
+            Entity: entity,
+            RecordID: entityId
         }).then(function(res) {
+            console.log("Record:", res);
             if(res.data && res.data.length > 0) {
                 lead = res.data[0];
-                // Update title
                 document.getElementById('leadTitle').innerText =
                     (lead.Full_Name || 'Lead') +
                     (lead.Company ? ' — ' + lead.Company : '');
-                // Update grid
                 var g = document.getElementById('leadGrid');
                 g.innerHTML = [
                     ['Source', lead.Lead_Source],
@@ -209,25 +179,34 @@ function initZoho() {
                     ['Priority', lead.Priority || 'N/A'],
                     ['Timeline', lead.Timeline || 'N/A'],
                     ['Status', lead.Lead_Status || 'N/A']
-                ].map(function(f) {
+                ].map(function(f){
                     return '<div class="grid-item"><b>'+f[0]+':</b> '+(f[1]||'N/A')+'</div>';
                 }).join('');
-                // Clear and show welcome
                 document.getElementById('msgs').innerHTML = '';
                 addMsg('✅ ' + lead.Full_Name + ' loaded! Ask me anything.', 'ai');
-            } else {
-                document.getElementById('leadTitle').innerText = 'No data';
             }
-        }).catch(function(e) {
-            document.getElementById('leadTitle').innerText = 'API Error';
-            addMsg('API Error: ' + e.message, 'ai');
+        }).catch(function(e){
+            console.error("Record fetch error:", e);
+            document.getElementById('leadTitle').innerText = 'Fetch Error';
         });
     });
     ZOHO.embeddedApp.init();
 }
+
+// Wait for SDK
+function waitForZoho() {
+    if(typeof ZOHO !== 'undefined' && 
+       typeof ZOHO.embeddedApp !== 'undefined') {
+        loadLeadData();
+    } else {
+        setTimeout(waitForZoho, 200);
+    }
+}
+
+waitForZoho();
 </script>
 
-<!-- Load SDK LAST -->
-<script src="https://js.zohostatic.com/zohocrm/javascript/v2.0/js/zcrmsdk.js"></script>
+<!-- SDK at bottom -->
+<script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
 </body>
 </html>
