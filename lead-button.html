@@ -93,6 +93,7 @@ function getContext() {
         "\nBudget: " + (lead.Budget||'N/A') +
         "\nTimeline: " + (lead.Timeline||'N/A') +
         "\nRequirement: " + (lead.Requirement_Type||'N/A') +
+        
         "\nScore: " + (lead.Lead_Score||'N/A') +
         "\nPriority: " + (lead.Priority||'N/A') +
         "\nStatus: " + (lead.Lead_Status||'N/A');
@@ -108,13 +109,11 @@ function askAI(question) {
         "Here is the lead data:\n" + getContext() +
         "\n\nQuestion: " + question +
         "\n\nGive a concise, actionable answer in 3-4 lines.";
-    fetch(NGROK + "/api/generate", {
-        method: "POST",
-headers: {
-    "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true"
-},
-        body: JSON.stringify({
+fetch(NGROK + "/api/generate?ngrok-skip-browser-warning=true", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },     body: JSON.stringify({
             model: MODEL,
             prompt: prompt,
             stream: false,
