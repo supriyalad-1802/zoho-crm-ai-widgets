@@ -111,7 +111,8 @@ function askAI(question) {
     fetch(NGROK + "/api/generate", {
         method: "POST",
 headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
 },
         body: JSON.stringify({
             model: MODEL,
