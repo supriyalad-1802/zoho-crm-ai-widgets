@@ -2,201 +2,233 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f8f9ff; padding: 20px; }
-        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #e8ecff; padding-bottom: 10px; }
-        .ai-badge { background: linear-gradient(135deg,#667eea,#764ba2); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-        .lead-info { background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; border: 1px solid #e8ecff; font-size: 12px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .info-item { color: #4a5568; }
-        .info-item b { color: #2d3748; }
-        .quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-        .qp-btn { padding: 5px 12px; border: 1.5px solid #667eea; border-radius: 20px; background: white; color: #667eea; cursor: pointer; font-size: 11px; }
-        .qp-btn:hover { background: #667eea; color: white; }
-        .chat-container { background: white; border-radius: 10px; border: 1px solid #e8ecff; overflow: hidden; }
-        .chat-messages { height: 250px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
-        .msg.user { background: linear-gradient(135deg,#667eea,#764ba2); color: white; align-self: flex-end; }
-        .msg.ai { background: #f0f4ff; color: #2d3748; align-self: flex-start; white-space: pre-wrap; }
-        .msg.loading { background: #f0f4ff; color: #667eea; align-self: flex-start; font-style: italic; }
-        .input-row { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e8ecff; }
-        .msg-input { flex: 1; padding: 8px 14px; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: 13px; outline: none; }
-        .msg-input:focus { border-color: #667eea; }
-        .send-btn { padding: 8px 18px; background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 13px; }
-        .send-btn:disabled { opacity: 0.5; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:#f8f9ff;padding:15px;}
+        .header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #e8ecff;}
+        .badge{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+        .title{font-weight:600;color:#2d3748;font-size:14px;}
+        .lead-box{background:white;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #e8ecff;font-size:11px;}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+        .grid-item{color:#4a5568;}
+        .grid-item b{color:#2d3748;}
+        .qbtns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+        .qbtn{padding:4px 10px;border:1.5px solid #667eea;border-radius:15px;background:white;color:#667eea;cursor:pointer;font-size:11px;}
+        .qbtn:hover{background:#667eea;color:white;}
+        .chatbox{background:white;border-radius:8px;border:1px solid #e8ecff;overflow:hidden;}
+        .msgs{height:220px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;}
+        .msg{max-width:85%;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.5;}
+        .user{background:linear-gradient(135deg,#667eea,#764ba2);color:white;align-self:flex-end;}
+        .ai{background:#f0f4ff;color:#2d3748;align-self:flex-start;white-space:pre-wrap;}
+        .loading{background:#f0f4ff;color:#667eea;align-self:flex-start;font-style:italic;}
+        .inputrow{display:flex;gap:6px;padding:8px;border-top:1px solid #e8ecff;}
+        .inp{flex:1;padding:7px 12px;border:1px solid #e2e8f0;border-radius:15px;font-size:12px;outline:none;}
+        .inp:focus{border-color:#667eea;}
+        .sbtn{padding:7px 14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:15px;cursor:pointer;font-size:12px;}
+        .sbtn:disabled{opacity:0.5;}
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="ai-badge">🤖 AI Assistant</div>
-    <div id="leadTitle" style="font-weight:600; color:#2d3748;">Connecting to Zoho...</div>
+    <div class="badge">🤖 AI</div>
+    <div class="title" id="leadTitle">Loading...</div>
 </div>
 
-<div class="lead-info">
-    <div class="info-grid" id="infoGrid">
-        <div class="info-item">Waiting for lead data...</div>
+<div class="lead-box">
+    <div class="grid" id="leadGrid">
+        <div class="grid-item">Fetching lead data...</div>
     </div>
 </div>
 
-<div class="quick-prompts">
-    <button class="qp-btn" onclick="quickAsk('Analyze this lead and suggest best next action')">📊 Analyze</button>
-    <button class="qp-btn" onclick="quickAsk('Draft a follow-up email for this lead')">✉️ Email</button>
-    <button class="qp-btn" onclick="quickAsk('What are key risks and opportunities?')">⚠️ Risk</button>
-    <button class="qp-btn" onclick="quickAsk('Give 3 talking points for next call')">💬 Points</button>
-    <button class="qp-btn" onclick="quickAsk('Will this lead likely convert? Give probability')">🎯 Convert?</button>
+<div class="qbtns">
+    <button class="qbtn" id="btn1">📊 Analyze</button>
+    <button class="qbtn" id="btn2">✉️ Draft Email</button>
+    <button class="qbtn" id="btn3">⚠️ Risks</button>
+    <button class="qbtn" id="btn4">💬 Talking Points</button>
+    <button class="qbtn" id="btn5">🎯 Convert?</button>
 </div>
 
-<div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
-        <div class="msg ai">👋 Hi! I'm your AI assistant. Ask me anything about this lead!</div>
+<div class="chatbox">
+    <div class="msgs" id="msgs">
+        <div class="msg ai">👋 Hi! Ask me anything about this lead.</div>
     </div>
-    <div class="input-row">
-        <input type="text" class="msg-input" id="msgInput" 
-               placeholder="Ask about this lead..."
-               onkeydown="if(event.key==='Enter') sendMsg()">
-        <button class="send-btn" id="sendBtn" onclick="sendMsg()">Send ➤</button>
+    <div class="inputrow">
+        <input class="inp" id="inp" type="text" placeholder="Type your question...">
+        <button class="sbtn" id="sbtn">Send ➤</button>
     </div>
 </div>
 
 <script>
-    var NGROK_URL = "https://grey-nonesurient-jaquelyn.ngrok-free.dev";
-    var leadData = {};
+// ============================================
+// CONFIG — UPDATE NGROK URL HERE
+// ============================================
+var NGROK = "https://grey-nonesurient-jaquelyn.ngrok-free.dev";
+var MODEL = "llama3.2";
+var lead = {};
 
-    function addMessage(text, type) {
-        var container = document.getElementById('chatMessages');
-        var div = document.createElement('div');
-        div.className = 'msg ' + type;
-        if(type === 'loading') div.id = 'loadingMsg';
-        div.innerText = text;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-        return div;
-    }
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+function addMsg(text, type) {
+    var c = document.getElementById('msgs');
+    var d = document.createElement('div');
+    d.className = 'msg ' + type;
+    if(type === 'loading') d.id = 'loadMsg';
+    d.innerText = text;
+    c.appendChild(d);
+    c.scrollTop = c.scrollHeight;
+}
 
-    function buildContext() {
-        if(!leadData || !leadData.Full_Name) {
-            return "Lead data not available yet. Please answer generally.";
-        }
-        return "Lead Name: " + (leadData.Full_Name || 'N/A') +
-               "\nCompany: " + (leadData.Company || 'N/A') +
-               "\nLead Source: " + (leadData.Lead_Source || 'N/A') +
-               "\nBudget: " + (leadData.Budget || 'N/A') +
-               "\nTimeline: " + (leadData.Timeline || 'N/A') +
-               "\nRequirement Type: " + (leadData.Requirement_Type || 'N/A') +
-               "\nLead Score: " + (leadData.Lead_Score || 'N/A') +
-               "\nPriority: " + (leadData.Priority || 'N/A') +
-               "\nStatus: " + (leadData.Lead_Status || 'N/A') +
-               "\nEmail: " + (leadData.Email || 'N/A');
-    }
+function removeLoading() {
+    var l = document.getElementById('loadMsg');
+    if(l) l.remove();
+}
 
-    function callOllama(question) {
-        var btn = document.getElementById('sendBtn');
-        btn.disabled = true;
+function getContext() {
+    if(!lead.Full_Name) return "No lead context loaded.";
+    return "Name: " + (lead.Full_Name||'N/A') +
+        "\nCompany: " + (lead.Company||'N/A') +
+        "\nSource: " + (lead.Lead_Source||'N/A') +
+        "\nBudget: " + (lead.Budget||'N/A') +
+        "\nTimeline: " + (lead.Timeline||'N/A') +
+        "\nRequirement: " + (lead.Requirement_Type||'N/A') +
+        "\nScore: " + (lead.Lead_Score||'N/A') +
+        "\nPriority: " + (lead.Priority||'N/A') +
+        "\nStatus: " + (lead.Lead_Status||'N/A');
+}
 
-        addMessage(question, 'user');
-        addMessage('🤖 Thinking...', 'loading');
-
-        var prompt = "You are a CRM sales assistant. " +
-            "Analyze this lead and answer the question.\n\n" +
-            "LEAD DATA:\n" + buildContext() +
-            "\n\nQUESTION: " + question +
-            "\n\nBe specific, concise and actionable. Max 4 lines.";
-
-        fetch(NGROK_URL + "/api/generate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true"
-            },
-            body: JSON.stringify({
-                model: "llama3.2",
-                prompt: prompt,
-                stream: false,
-                options: { temperature: 0.3, num_predict: 200 }
-            })
+function askAI(question) {
+    if(!question || !question.trim()) return;
+    document.getElementById('sbtn').disabled = true;
+    document.getElementById('inp').value = '';
+    addMsg(question, 'user');
+    addMsg('🤖 Thinking...', 'loading');
+    var prompt = "You are a CRM sales assistant. " +
+        "Here is the lead data:\n" + getContext() +
+        "\n\nQuestion: " + question +
+        "\n\nGive a concise, actionable answer in 3-4 lines.";
+    fetch(NGROK + "/api/generate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true"
+        },
+        body: JSON.stringify({
+            model: MODEL,
+            prompt: prompt,
+            stream: false,
+            options: {temperature: 0.3, num_predict: 200}
         })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            var loading = document.getElementById('loadingMsg');
-            if(loading) loading.remove();
-            addMessage(data.response || "No response from AI", 'ai');
-        })
-        .catch(function(err) {
-            var loading = document.getElementById('loadingMsg');
-            if(loading) loading.remove();
-            addMessage("❌ Error: " + err.message + 
-                "\nCheck: Ollama + Ngrok running?", 'ai');
-        })
-        .finally(function() {
-            btn.disabled = false;
-        });
-    }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        removeLoading();
+        addMsg(d.response || "No response", 'ai');
+    })
+    .catch(function(e){
+        removeLoading();
+        addMsg("❌ Error: " + e.message, 'ai');
+    })
+    .finally(function(){
+        document.getElementById('sbtn').disabled = false;
+    });
+}
 
-    function sendMsg() {
-        var input = document.getElementById('msgInput');
-        var question = input.value.trim();
-        if(!question) return;
-        input.value = '';
-        callOllama(question);
-    }
+// ============================================
+// BUTTON EVENTS — Attached after DOM ready
+// ============================================
+window.onload = function() {
+    // Send button
+    document.getElementById('sbtn').onclick = function() {
+        askAI(document.getElementById('inp').value);
+    };
 
-    function quickAsk(prompt) {
-        callOllama(prompt);
-    }
+    // Enter key
+    document.getElementById('inp').onkeydown = function(e) {
+        if(e.key === 'Enter') askAI(this.value);
+    };
 
-    // ZOHO SDK Initialization
+    // Quick buttons
+    document.getElementById('btn1').onclick = function() {
+        askAI('Analyze this lead and suggest the best next action');
+    };
+    document.getElementById('btn2').onclick = function() {
+        askAI('Draft a short personalized follow-up email for this lead');
+    };
+    document.getElementById('btn3').onclick = function() {
+        askAI('What are the key risks with this lead?');
+    };
+    document.getElementById('btn4').onclick = function() {
+        askAI('Give 3 specific talking points for my next call with this lead');
+    };
+    document.getElementById('btn5').onclick = function() {
+        askAI('Will this lead likely convert? Give probability and reason');
+    };
+
+    // ============================================
+    // ZOHO SDK — Load AFTER all functions defined
+    // ============================================
+    if(typeof ZOHO !== 'undefined') {
+        initZoho();
+    } else {
+        // Wait for SDK to load
+        var checkSDK = setInterval(function() {
+            if(typeof ZOHO !== 'undefined') {
+                clearInterval(checkSDK);
+                initZoho();
+            }
+        }, 100);
+        // Timeout after 5 seconds
+        setTimeout(function() {
+            clearInterval(checkSDK);
+            document.getElementById('leadTitle').innerText = 'SDK Timeout';
+            addMsg('⚠️ Zoho SDK timeout. AI still works without lead context.', 'ai');
+        }, 5000);
+    }
+};
+
+function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", function(data) {
-        console.log("PageLoad event:", data);
-        document.getElementById('leadTitle').innerText = "Loading...";
-
+        document.getElementById('leadTitle').innerText = 'Loading lead...';
         ZOHO.CRM.API.getRecord({
             Entity: data.Entity,
             RecordID: data.EntityId
-        }).then(function(response) {
-            console.log("Record response:", response);
-            if(response.data && response.data.length > 0) {
-                leadData = response.data[0];
-
-                // Update header
-                document.getElementById('leadTitle').innerText = 
-                    (leadData.Full_Name || 'Lead') + 
-                    (leadData.Company ? ' — ' + leadData.Company : '');
-
-                // Update info grid
-                var grid = document.getElementById('infoGrid');
-                grid.innerHTML = [
-                    ['Source', leadData.Lead_Source],
-                    ['Budget', leadData.Budget ? '₹'+leadData.Budget : 'N/A'],
-                    ['Score', leadData.Lead_Score || 'N/A'],
-                    ['Priority', leadData.Priority || 'N/A'],
-                    ['Timeline', leadData.Timeline || 'N/A'],
-                    ['Status', leadData.Lead_Status || 'N/A']
+        }).then(function(res) {
+            if(res.data && res.data.length > 0) {
+                lead = res.data[0];
+                // Update title
+                document.getElementById('leadTitle').innerText =
+                    (lead.Full_Name || 'Lead') +
+                    (lead.Company ? ' — ' + lead.Company : '');
+                // Update grid
+                var g = document.getElementById('leadGrid');
+                g.innerHTML = [
+                    ['Source', lead.Lead_Source],
+                    ['Budget', lead.Budget ? '₹'+lead.Budget : 'N/A'],
+                    ['Score', lead.Lead_Score || 'N/A'],
+                    ['Priority', lead.Priority || 'N/A'],
+                    ['Timeline', lead.Timeline || 'N/A'],
+                    ['Status', lead.Lead_Status || 'N/A']
                 ].map(function(f) {
-                    return '<div class="info-item"><b>' + f[0] + ':</b> ' + 
-                           (f[1] || 'N/A') + '</div>';
+                    return '<div class="grid-item"><b>'+f[0]+':</b> '+(f[1]||'N/A')+'</div>';
                 }).join('');
-
-                // Welcome message with lead name
-                var container = document.getElementById('chatMessages');
-                container.innerHTML = '';
-                addMessage('✅ Context loaded for ' + leadData.Full_Name + 
-                    '. Ask me anything about this lead!', 'ai');
-
+                // Clear and show welcome
+                document.getElementById('msgs').innerHTML = '';
+                addMsg('✅ ' + lead.Full_Name + ' loaded! Ask me anything.', 'ai');
             } else {
-                document.getElementById('leadTitle').innerText = "Lead Data Unavailable";
-                document.getElementById('infoGrid').innerHTML = 
-                    '<div>Could not load lead data</div>';
+                document.getElementById('leadTitle').innerText = 'No data';
             }
-        }).catch(function(err) {
-            console.error("API Error:", err);
-            document.getElementById('leadTitle').innerText = "API Error";
+        }).catch(function(e) {
+            document.getElementById('leadTitle').innerText = 'API Error';
+            addMsg('API Error: ' + e.message, 'ai');
         });
     });
-
     ZOHO.embeddedApp.init();
+}
 </script>
+
+<!-- Load SDK LAST -->
+<script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbedAppSDK.min.js"></script>
 </body>
 </html>
