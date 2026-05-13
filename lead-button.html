@@ -110,10 +110,9 @@ function askAI(question) {
         "\n\nGive a concise, actionable answer in 3-4 lines.";
     fetch(NGROK + "/api/generate", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true"
-        },
+headers: {
+    "Content-Type": "application/json"
+},
         body: JSON.stringify({
             model: MODEL,
             prompt: prompt,
